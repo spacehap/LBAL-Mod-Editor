@@ -10,11 +10,20 @@ namespace LBAL_ModEditor
 {
 	class Program
 	{
-		private static int _intputCount = 0;
-		private const int _maxNameLength = 15; 
+		private const int _maxNameLength = 15;
 		private const int _maxLoopCount = 10;
-		private const string _debuggerFilePath = @"C:\Users\thepa\AppData\Roaming\Godot\app_userdata\Luck be a Landlord\LBAL-Sandbox-Data.save";
-			
+
+
+		private static bool _amDebugging = false;
+		private static bool _capturingInput = false;
+		private static List<string> _debuggingInputs = new List<string> { "3", "0" };
+		private static int _intputCount = 0;
+
+
+		private static readonly string _debuggerFilePath = Path.Combine(GetLbalDirectory(), "LBAL-Sandbox-Data.save");
+		private static readonly string _modsDirectory = Path.Combine(GetLbalDirectory(), "mods");
+		public static string WorkingDirectory = Path.Combine(_modsDirectory, Directory.EnumerateDirectories(_modsDirectory).First());
+
 
 		static void Main(string[] args)
 		{
@@ -26,10 +35,17 @@ namespace LBAL_ModEditor
 				loopCountdown--;
 				Console.Out.Flush();
 
-				switch(input)
+				Console.WriteLine();
+				switch (input)
 				{
 					case -1:
-						Console.WriteLine("Welcome to the Luck be a Landlord Mod Editor");
+						if (!_amDebugging) { Console.Clear(); }
+						Console.WriteLine("*~~~~* Welcome to the Luck be a Landlord Mod Editor *~~~~*");
+						Console.WriteLine($"- Current working with ... {WorkingDirectory.Split(Path.DirectorySeparatorChar).Last()}");
+						break;
+					case 42:
+						Console.WriteLine("~~~~ Settings ~~~~");
+						// TODO: ChangeWorkingDirectory();
 						break;
 					case 0:
 						bool sandboxVal = ToggleDebugging();
@@ -41,46 +57,63 @@ namespace LBAL_ModEditor
 						break;
 					case 2:
 						Console.WriteLine("~~~~ Create Symbol ~~~~");
-						EditDebuggingGrid();
+						CreateSymbol();
 						break;
 					case 3:
 						Console.WriteLine("~~~~ Edit Symbol ~~~~");
-						EditDebuggingGrid();
+						// TODO: EditSymbol();
+						break;
+					case 99:
+						Console.WriteLine("~~~~ Capturing Input ~~~~");
+						_debuggingInputs.Clear();
+						_capturingInput = true;
 						break;
 					default:
 						Console.WriteLine("Not Implemented");
 						break;
 				}
 				
-				
-				Console.WriteLine("~~~~ Menu ~~~~");
-				Console.WriteLine("* - Exit");
-				Console.WriteLine("0 - Toggle debugging");
-				Console.WriteLine("1 - Edit Debugging Grid");
-				Console.WriteLine("2 - Create Symbol");
-				Console.WriteLine("3 - Edit Symbol");
-							
-				Console.Write("Choose Operation: ");
-				string inputStr = GetInput();
+				string inputStr = GetChoiceString(Menus.Main, "Choose Operation: ");
 				shouldContinue = int.TryParse(inputStr, out input);
-				Console.WriteLine("\n" + input.ToString());
 
-			} while(shouldContinue && loopCountdown > 0);
+			} while (shouldContinue && loopCountdown > 0);
 
 			if(loopCountdown == 0)
 			{
 				Console.WriteLine("!!Max Loop Count Exceeded!!!");
 			}
 		}
+
+		private static string GetLbalDirectory()
+		{
+			string directoryPart = @"AppData\Roaming\Godot\app_userdata\Luck be a Landlord";
+			string userDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+			return Path.Combine(userDir, directoryPart);
+		}
 		
 		private static string GetInput()
 		{
-			string[] inputs = new string[] {"1", "(0,1)overridenSymbol"};
-			string inputStr = _intputCount<inputs.Length ? inputs[_intputCount] : null;
-			inputStr = inputStr??Console.ReadLine();
+			Console.Out.Flush();
+			bool hasDebugInputs = _intputCount < _debuggingInputs.Count();
+			string inputStr = _amDebugging && hasDebugInputs ? _debuggingInputs[_intputCount] : Console.ReadLine();
 			_intputCount++;
+
+			if (_capturingInput)
+				_debuggingInputs.Add(inputStr);
+
 			return inputStr;
 		}
+
+		private static string GetChoiceString(List<string> menuDisplay, string inputMessage = "Input: ")
+		{
+			foreach (var item in menuDisplay)
+			{
+				Console.WriteLine(item);
+			}
+			Console.Write(inputMessage);
+			return GetInput();
+		}
+
 
 		private static bool ToggleDebugging()
 		{

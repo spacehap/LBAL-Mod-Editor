@@ -14,7 +14,7 @@
 			"type": "coreclr",
 			"request": "launch",
 			"preLaunchTask": "build",
-			"program": "${workspaceFolder}/bin/Debug/net5.0/LBALL_ModEditor.dll",
+			"program": "${workspaceFolder}/bin/Debug/net5.0/LBAL_ModEditor.dll",
 			"args": [],
 			"cwd": "${workspaceFolder}",
 			"console": "internalConsole",
