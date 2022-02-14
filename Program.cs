@@ -9,15 +9,14 @@ namespace LBAL_ModEditor
 	class Program
 	{
 		private const int _maxLoopCount = 10;
-		
-		private static bool _amDebugging = false;
 		private static bool _capturingInput = false;
 		private static List<string> _debuggingInputs = new List<string> { "3", "0" };
 		private static int _intputCount = 0;
 
-
 		private static readonly string _debuggerFilePath = Path.Combine(GetLbalDirectory(), DebugController.FILENAME);
 		private static readonly string _modsDirectory = Path.Combine(GetLbalDirectory(), "mods");
+
+		public static bool IsDebugging = false;
 		public static string WorkingDirectory = Path.Combine(_modsDirectory, Directory.EnumerateDirectories(_modsDirectory).First());
 
 
@@ -38,7 +37,7 @@ namespace LBAL_ModEditor
 				switch (input)
 				{
 					case -1:
-						if (!_amDebugging) { Console.Clear(); }
+						if (!IsDebugging) { Console.Clear(); }
 						Console.WriteLine("*~~~~* Welcome to the Luck be a Landlord Mod Editor *~~~~*");
 						Console.WriteLine($"- Current working with ... {WorkingDirectory.Split(Path.DirectorySeparatorChar).Last()}");
 						break;
@@ -89,6 +88,26 @@ namespace LBAL_ModEditor
 			string directoryPart = @"AppData\Roaming\Godot\app_userdata\Luck be a Landlord";
 			string userDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 			return Path.Combine(userDir, directoryPart);
+		}
+
+
+		private static void ChangeWorkingDirectory()
+		{
+			string inputStr = Input.Instance.GetInput("Change Working Dir? (y,n) ");
+
+			if (inputStr.ToLower().Equals("y"))
+			{
+				string[] mods = Directory.GetDirectories(_modsDirectory);
+				List<string> menu = new List<string>();
+				for (int i = 0; i < mods.Length; i++)
+				{
+					menu.Add($"{i} - {mods[i]}");
+				}
+
+				int choice = Input.Instance.GetChoiceInt(menu);
+
+				WorkingDirectory = Path.Combine(_modsDirectory, mods[choice]);
+			}
 		}
 
 	}

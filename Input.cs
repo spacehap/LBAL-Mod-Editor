@@ -20,18 +20,18 @@ namespace LBAL_ModEditor
 
 		private Input() {}
 
-
-		private bool _amDebugging = false;
 		private bool _capturingInput = false;
 		private List<string> _debuggingInputs = new List<string> { "3", "0" };
 		private int _intputCount = 0;
 
 
-		public string GetInput()
+		public string GetInput(string inputMessage = "Input: ")
 		{
 			Console.Out.Flush();
+			Console.Write(inputMessage);
+			
 			bool hasDebugInputs = _intputCount < _debuggingInputs.Count;
-			string inputStr = _amDebugging && hasDebugInputs ? _debuggingInputs[_intputCount] : Console.ReadLine();
+			string inputStr = Program.IsDebugging && hasDebugInputs ? _debuggingInputs[_intputCount] : Console.ReadLine();
 			_intputCount++;
 
 			if (_capturingInput)
@@ -46,7 +46,6 @@ namespace LBAL_ModEditor
 			{
 				Console.WriteLine(item);
 			}
-			Console.Write(inputMessage);
 			return GetInput();
 		}
 
