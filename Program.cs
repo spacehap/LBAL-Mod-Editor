@@ -57,11 +57,13 @@ namespace LBAL_ModEditor
 						break;
 					case 2:
 						Console.WriteLine("~~~~ Create Symbol ~~~~");
-						CreateSymbol();
+						new SymbolControler(WorkingDirectory).CreateSymbol();
 						break;
 					case 3:
 						Console.WriteLine("~~~~ Edit Symbol ~~~~");
-						// TODO: EditSymbol();
+						SymbolControler ctlr = new SymbolControler(WorkingDirectory);
+						ctlr.SelectSymbol();
+						ctlr.EditSymbol();
 						break;
 					case 99:
 						Console.WriteLine("~~~~ Capturing Input ~~~~");
@@ -73,7 +75,7 @@ namespace LBAL_ModEditor
 						break;
 				}
 				
-				string inputStr = GetChoiceString(Menus.Main, "Choose Operation: ");
+				string inputStr = Input.Instance.GetChoiceString(Menus.Main, "Choose Operation: ");
 				shouldContinue = int.TryParse(inputStr, out input);
 
 			} while (shouldContinue && loopCountdown > 0);
@@ -91,29 +93,6 @@ namespace LBAL_ModEditor
 			return Path.Combine(userDir, directoryPart);
 		}
 		
-		private static string GetInput()
-		{
-			Console.Out.Flush();
-			bool hasDebugInputs = _intputCount < _debuggingInputs.Count();
-			string inputStr = _amDebugging && hasDebugInputs ? _debuggingInputs[_intputCount] : Console.ReadLine();
-			_intputCount++;
-
-			if (_capturingInput)
-				_debuggingInputs.Add(inputStr);
-
-			return inputStr;
-		}
-
-		private static string GetChoiceString(List<string> menuDisplay, string inputMessage = "Input: ")
-		{
-			foreach (var item in menuDisplay)
-			{
-				Console.WriteLine(item);
-			}
-			Console.Write(inputMessage);
-			return GetInput();
-		}
-
 
 		private static bool ToggleDebugging()
 		{
@@ -131,16 +110,8 @@ namespace LBAL_ModEditor
 			do {
 				Console.WriteLine();
 				PrintSymbolGrid(rows);
-				
-				Console.WriteLine("\n---- Edit Menu ----");
-				Console.WriteLine("* - Exit");
-				Console.WriteLine("(x,y)[SYMBOL_NAME] - Override symbol at position (x,y)");
-				Console.WriteLine("clear - Make Entire Grid Empty");
-				Console.WriteLine("coin - Make Entire Grid Coin");
-				Console.WriteLine("save - Save and Exit");
 
-				Console.Write("Input: ");
-				string inputStr = GetInput();
+				string inputStr = Input.Instance.GetChoiceString(Menus.EditGrid);
 
 				const string overridePattern = "\\([0-4],[0-4]\\)\\w.*";
 				Regex overrideRegex = new Regex(overridePattern);
@@ -212,11 +183,6 @@ namespace LBAL_ModEditor
 			}
 		}
 
-		private static void CreateSymbol()
-		{
-
-		}
-
 		private static GameState GetGameState()
 		{
 			string[] debuggerFileLines = File.ReadAllLines(_debuggerFilePath);
@@ -234,6 +200,7 @@ namespace LBAL_ModEditor
 			return rows;
 		}
 
+
 		private static void Save(GameState gameState)
 		{
 			string[] debuggerFileLines = File.ReadAllLines(_debuggerFilePath);
@@ -247,10 +214,12 @@ namespace LBAL_ModEditor
 			string[] debuggerFileLines = File.ReadAllLines(_debuggerFilePath);
 			for (int i = 1; i < rows.Length; i++)
 			{
-				debuggerFileLines[i] = rows[i-1].Serialize(i);
+				debuggerFileLines[i] = rows[i - 1].Serialize(i);
 			}
 			File.Delete(_debuggerFilePath);
 			File.WriteAllLines(_debuggerFilePath, debuggerFileLines);
 		}
+
+
 	}
 }
